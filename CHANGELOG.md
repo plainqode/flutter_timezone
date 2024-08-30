@@ -1,3 +1,7 @@
+## 3.0.1
+
+* Remove leftover reference to v1 Android embedding API ([#35](https://github.com/tjarvstrand/flutter_timezone/issues/35))
+
 ## 3.0.0
 
 * **Breaking change:** Remove support for the old version 1 of the Android embedding API which will no longer be
