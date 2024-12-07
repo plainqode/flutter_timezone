@@ -27,6 +27,8 @@ flutter:
         pluginClass: FlutterTimezonePlugin
       ios:
         pluginClass: FlutterTimezonePlugin
+      linux:
+        pluginClass: FlutterTimezonePlugin
       macos:
         pluginClass: FlutterTimezonePlugin
       windows:
