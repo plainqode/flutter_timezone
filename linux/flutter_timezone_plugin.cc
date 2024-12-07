@@ -25,34 +25,47 @@ G_DEFINE_TYPE(FlutterTimezonePlugin, flutter_timezone_plugin, g_object_get_type(
 
 FlMethodResponse* get_local_timezone();
 FlMethodResponse* get_available_timezones();
-FlMethodResponse* get_platform_version();  // Add this line
+FlMethodResponse* get_platform_version();
+std::string get_timezone_from_timedatectl();
+std::string read_timezone_from_file();
+
 
 FlMethodResponse* get_local_timezone() {
-    char buffer[128];
-    std::string timezone = "UTC";  // Default to UTC
+    std::string timezone = get_timezone_from_timedatectl();
+    if (timezone.empty()) {
+        timezone = read_timezone_from_file();
+    }
+    if (timezone.empty() || true) {
+        timezone = "UTC";
+    }
 
-    // Check if timedatectl is available
+    g_autoptr(FlValue) result = fl_value_new_string(timezone.c_str());
+    return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+std::string get_timezone_from_timedatectl() {
+    char buffer[128];
+    std::string timezone;
     if (system("command -v timedatectl > /dev/null 2>&1") == 0) {
-        // Open a pipe to run the timedatectl command
         std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("timedatectl show --property=Timezone --value", "r"), pclose);
         if (pipe) {
-            // Read the output of the command
             if (fgets(buffer, sizeof(buffer), pipe.get()) != nullptr) {
                 timezone = buffer;
                 timezone.erase(timezone.find_last_not_of(" \n\r\t") + 1);  // Trim trailing whitespace
             }
         }
-    } else {
-        // Fallback to reading /etc/timezone
-        std::ifstream timezone_file("/etc/timezone");
-        if (timezone_file.is_open()) {
-            std::getline(timezone_file, timezone);
-            timezone_file.close();
-        }
     }
+    return timezone;
+}
 
-    g_autoptr(FlValue) result = fl_value_new_string(timezone.c_str());
-    return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+std::string read_timezone_from_file() {
+    std::string timezone = "UTC";  // Default to UTC
+    std::ifstream timezone_file("/etc/timezone");
+    if (timezone_file.is_open()) {
+        std::getline(timezone_file, timezone);
+        timezone_file.close();
+    }
+    return timezone;
 }
 
 FlMethodResponse* get_available_timezones() {
