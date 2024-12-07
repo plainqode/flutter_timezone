@@ -17,11 +17,12 @@ jobs:
          - ubuntu-latest
          - macos-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
-          java-version: '12.x'
-      - uses: subosito/flutter-action@v1
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       - run: dart --version
